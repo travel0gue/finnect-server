@@ -119,10 +119,17 @@ public class Project {
                 .collect(Collectors.toList());
     }
 
-    public List<EquityReward> getEquityRewards() {
+    public List<StockReward> getStockRewards() {
         return rewards.stream()
-                .filter(reward -> reward instanceof EquityReward)
-                .map(reward -> (EquityReward) reward)
+                .filter(reward -> reward instanceof StockReward)
+                .map(reward -> (StockReward) reward)
+                .collect(Collectors.toList());
+    }
+
+    public List<BondReward> getBondRewards() {
+        return rewards.stream()
+                .filter(reward -> reward instanceof BondReward)
+                .map(reward -> (BondReward) reward)
                 .collect(Collectors.toList());
     }
 

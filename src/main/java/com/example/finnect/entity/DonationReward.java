@@ -22,6 +22,9 @@ public class DonationReward extends Reward {
     
     @Column(name = "reward_item")
     private String rewardItem;
+
+    @Column(name = "price")
+    private BigDecimal price;
     
     @Column(name = "estimated_delivery_date")
     private LocalDate estimatedDeliveryDate;
