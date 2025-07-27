@@ -1,5 +1,6 @@
 package com.example.finnect.entity;
 
+import com.example.finnect.entity.enums.DeliveryStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -77,11 +78,6 @@ public class Delivery {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    // 배송 상태 enum
-    public enum DeliveryStatus {
-        PENDING, PROCESSING, SHIPPED, DELIVERED, RETURNED, CANCELLED
-    }
 
     // 양방향 매핑 편의 메소드
     public void setInvestment(Investment investment) {
