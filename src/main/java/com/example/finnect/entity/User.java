@@ -35,7 +35,32 @@ public class User implements UserDetails {
     
     @Enumerated(EnumType.STRING)
     private Role role;
-    
+
+    @Column(nullable = false)
+    private boolean isVerified;
+
+    @Column(nullable = false)
+    private boolean isEnabled;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Farmer farmer;
+
+    public void setFarmer(Farmer farmer) {
+        // 기존 관계가 있다면 제거
+        if (this.farmer != null) {
+            this.farmer.setUser(null);
+        }
+
+        this.farmer = farmer;
+
+        // 새로운 관계 설정
+        if (farmer != null) {
+            farmer.setUser(this);
+        }
+    }
+
+
+    // 인증 관련 메소드
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
