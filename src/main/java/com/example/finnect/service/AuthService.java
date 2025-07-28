@@ -1,5 +1,6 @@
 package com.example.finnect.service;
 
+import com.example.finnect.apiResponse.ErrorStatus;
 import com.example.finnect.dto.AuthResponse;
 import com.example.finnect.dto.LoginRequest;
 import com.example.finnect.dto.SignupRequest;
@@ -8,6 +9,7 @@ import com.example.finnect.dto.TokenRefreshResponse;
 import com.example.finnect.entity.RefreshToken;
 import com.example.finnect.entity.Role;
 import com.example.finnect.entity.User;
+import com.example.finnect.exception.CustomException;
 import com.example.finnect.repository.UserRepository;
 import com.example.finnect.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,7 @@ public class AuthService {
         }
         
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+            throw new CustomException(ErrorStatus.DUPLICATED_USER);
         }
         
         User user = User.builder()

@@ -68,9 +68,11 @@ public class Investment {
         return reward instanceof DonationReward;
     }
 
-    public boolean isEquityReward() {
-        return reward instanceof EquityReward;
+    public boolean isStockReward() {
+        return reward instanceof StockReward;
     }
+
+    public boolean isBondReward() { return reward instanceof BondReward; }
 
     public boolean isLoanRepaymentReward() {
         return reward instanceof LoanRepaymentReward;
@@ -84,9 +86,16 @@ public class Investment {
         return null;
     }
 
-    public EquityReward getEquityReward() {
-        if (isEquityReward()) {
-            return (EquityReward) reward;
+    public StockReward getStockReward() {
+        if (isStockReward()) {
+            return (StockReward) reward;
+        }
+        return null;
+    }
+
+    public BondReward getBondReward() {
+        if (isBondReward()) {
+            return (BondReward) reward;
         }
         return null;
     }
