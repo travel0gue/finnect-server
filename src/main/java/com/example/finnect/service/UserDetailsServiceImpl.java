@@ -1,5 +1,7 @@
 package com.example.finnect.service;
 
+import com.example.finnect.apiResponse.ErrorStatus;
+import com.example.finnect.exception.CustomException;
 import com.example.finnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +18,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));
+                .orElseThrow(() -> new CustomException(ErrorStatus._NOT_FOUND));
     }
 }
