@@ -1,4 +1,4 @@
-package com.example.finnect.dto;
+package com.example.finnect.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

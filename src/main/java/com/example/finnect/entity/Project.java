@@ -1,8 +1,11 @@
 package com.example.finnect.entity;
 
+import com.example.finnect.apiResponse.ErrorStatus;
+import com.example.finnect.dto.request.ProjectCreateRequest;
 import com.example.finnect.entity.enums.FundingType;
 import com.example.finnect.entity.enums.ProjectStatus;
 import com.example.finnect.entity.enums.RiskLevel;
+import com.example.finnect.exception.CustomException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -160,5 +163,81 @@ public class Project {
 
     public long getDaysUntilDeadline() {
         return LocalDate.now().until(fundingEndDate).getDays();
+    }
+
+    // 완전한 프로젝트 생성 메소드 추가
+    public static Project create(ProjectCreateRequest request, Long userId) {
+        return Project.builder()
+                .userId(userId)
+                .fundingType(request.getFundingType())
+                .status(ProjectStatus.DRAFT) // 기본적으로 DRAFT 상태로 생성
+                .title(request.getTitle())
+                .content(request.getContent())
+                .projectImages(request.getProjectImages() != null ?
+                        new ArrayList<>(request.getProjectImages()) : new ArrayList<>())
+                .targetAmount(request.getTargetAmount())
+                .currentAmount(BigDecimal.ZERO)
+                .minInvestment(request.getMinInvestment())
+                .maxInvestment(request.getMaxInvestment())
+                .fundingStartDate(request.getFundingStartDate())
+                .fundingEndDate(request.getFundingEndDate())
+                .cropType(request.getCropType())
+                .farmLocation(request.getFarmLocation())
+                .farmSize(request.getFarmSize())
+                .expectedHarvestDate(request.getExpectedHarvestDate())
+                .rewards(new ArrayList<>()) // 빈 리워드 리스트로 초기화
+                .build();
+    }
+
+    public static Project createDraft(Long userId, FundingType fundingType) {
+        return Project.builder()
+                .userId(userId)
+                .fundingType(fundingType)
+                .status(ProjectStatus.DRAFT)
+                .currentAmount(BigDecimal.ZERO)
+                .build();
+    }
+
+    // 프로젝트 수정 비즈니스 메소드
+    public void updateProjectInfo(ProjectCreateRequest projectCreateRequest) {
+        
+        // 펀딩이 시작되었거나 완료된 프로젝트는 수정 불가
+        if (this.status == ProjectStatus.REVIEW ||
+                this.status == ProjectStatus.ACTIVE ||
+                this.status == ProjectStatus.FUNDED ||
+                this.status == ProjectStatus.CANCELLED ||
+                this.status == ProjectStatus.COMPLETED ||
+                this.status == ProjectStatus.FAILED) {
+            throw new CustomException(ErrorStatus.PROJECT_ALREADY_APPROVED);
+        }
+        
+        this.title = projectCreateRequest.getTitle();
+        this.content = projectCreateRequest.getContent();
+        this.fundingType = projectCreateRequest.getFundingType();
+        this.projectImages = projectCreateRequest.getProjectImages().stream().toList();
+        this.targetAmount = projectCreateRequest.getTargetAmount();
+        this.minInvestment = projectCreateRequest.getMinInvestment();
+        this.maxInvestment = projectCreateRequest.getMaxInvestment();
+        this.fundingStartDate = projectCreateRequest.getFundingStartDate();
+        this.fundingEndDate = projectCreateRequest.getFundingEndDate();
+        this.cropType = projectCreateRequest.getCropType();
+        this.farmLocation = projectCreateRequest.getFarmLocation();
+        this.farmSize = projectCreateRequest.getFarmSize();
+        this.expectedHarvestDate = projectCreateRequest.getExpectedHarvestDate();
+    }
+    
+    // 프로젝트 상태 변경 메소드
+    public void changeStatus(ProjectStatus newStatus) {
+        this.status = newStatus;
+    }
+    
+    // 소유자 확인 메소드
+    public boolean isOwnedBy(Long userId) {
+        return this.userId.equals(userId);
+    }
+    
+    // 수정 가능 여부 확인 메소드
+    public boolean isEditable() {
+        return this.status == ProjectStatus.DRAFT || this.status == ProjectStatus.SUBMITTED;
     }
 }

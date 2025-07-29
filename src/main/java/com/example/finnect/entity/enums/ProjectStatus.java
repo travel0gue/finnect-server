@@ -2,6 +2,7 @@ package com.example.finnect.entity.enums;
 
 public enum ProjectStatus {
     DRAFT("임시저장"),
+    SUBMITTED("제출됨"),
     REVIEW("심사중"),
     ACTIVE("펀딩중"),
     FUNDED("펀딩완료"),

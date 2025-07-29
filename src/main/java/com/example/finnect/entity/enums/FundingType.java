@@ -1,7 +1,8 @@
 package com.example.finnect.entity.enums;
 
 public enum FundingType {
-    EQUITY("지분투자"),
+    BOND("채권"),
+    STOCK("주식"),
     DONATION("후원"),
     P2P_LOAN("P2P 대출");
 

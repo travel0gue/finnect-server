@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import com.example.finnect.dto.request.LoanRepaymentRewardRequest;
 
 @Entity
 @Table(name = "loan_repayment_rewards")
@@ -39,4 +40,39 @@ public class LoanRepaymentReward extends Reward {
     
     @Column(name = "collateral_description")
     private String collateralDescription;
+
+    public static LoanRepaymentReward createDraft(Project project) {
+        return LoanRepaymentReward.builder()
+                .project(project)
+                .build();
+    }
+    
+    public static LoanRepaymentReward create(Project project, LoanRepaymentRewardRequest request) {
+        return LoanRepaymentReward.builder()
+                .project(project)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .amount(request.getAmount())
+                .interestRate(request.getInterestRate())
+                .loanTermMonths(request.getLoanTermMonths())
+                .repaymentFrequency(request.getRepaymentFrequency())
+                .gracePeriodMonths(request.getGracePeriodMonths())
+                .earlyRepaymentAllowed(request.isEarlyRepaymentAllowed())
+                .collateralRequired(request.isCollateralRequired())
+                .collateralDescription(request.getCollateralDescription())
+                .build();
+    }
+    
+    public void updateLoanRepaymentReward(LoanRepaymentRewardRequest request) {
+        this.setTitle(request.getTitle());
+        this.setDescription(request.getDescription());
+        this.setAmount(request.getAmount());
+        this.interestRate = request.getInterestRate();
+        this.loanTermMonths = request.getLoanTermMonths();
+        this.repaymentFrequency = request.getRepaymentFrequency();
+        this.gracePeriodMonths = request.getGracePeriodMonths();
+        this.earlyRepaymentAllowed = request.isEarlyRepaymentAllowed();
+        this.collateralRequired = request.isCollateralRequired();
+        this.collateralDescription = request.getCollateralDescription();
+    }
 }

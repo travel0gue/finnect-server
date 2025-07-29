@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import com.example.finnect.dto.request.StockRewardRequest;
 
 @Entity
 @Table(name = "stock_rewards")
@@ -64,4 +65,51 @@ public class StockReward extends Reward {
 
     @Column(name = "delivery_date", nullable = false)
     private LocalDate deliveryDate; // 교부일 (예: 2025-09-22)
+
+    public static StockReward createDraft(Project project) {
+        return StockReward.builder()
+                .project(project)
+                .build();
+    }
+    
+    public static StockReward create(Project project, StockRewardRequest request) {
+        return StockReward.builder()
+                .project(project)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .amount(request.getAmount())
+                .stockType(request.getStockType())
+                .targetAmount(request.getTargetAmount())
+                .sharePrice(request.getSharePrice())
+                .minInvestment(request.getMinInvestment())
+                .minInvestmentShares(request.getMinInvestmentShares())
+                .totalSharesToIssue(request.getTotalSharesToIssue())
+                .preMoneyValuation(request.getPreMoneyValuation())
+                .faceValue(request.getFaceValue())
+                .subscriptionStartDate(request.getSubscriptionStartDate())
+                .subscriptionEndDate(request.getSubscriptionEndDate())
+                .paymentDate(request.getPaymentDate())
+                .issueDate(request.getIssueDate())
+                .deliveryDate(request.getDeliveryDate())
+                .build();
+    }
+    
+    public void updateStockReward(StockRewardRequest request) {
+        this.setTitle(request.getTitle());
+        this.setDescription(request.getDescription());
+        this.setAmount(request.getAmount());
+        this.stockType = request.getStockType();
+        this.targetAmount = request.getTargetAmount();
+        this.sharePrice = request.getSharePrice();
+        this.minInvestment = request.getMinInvestment();
+        this.minInvestmentShares = request.getMinInvestmentShares();
+        this.totalSharesToIssue = request.getTotalSharesToIssue();
+        this.preMoneyValuation = request.getPreMoneyValuation();
+        this.faceValue = request.getFaceValue();
+        this.subscriptionStartDate = request.getSubscriptionStartDate();
+        this.subscriptionEndDate = request.getSubscriptionEndDate();
+        this.paymentDate = request.getPaymentDate();
+        this.issueDate = request.getIssueDate();
+        this.deliveryDate = request.getDeliveryDate();
+    }
 }
