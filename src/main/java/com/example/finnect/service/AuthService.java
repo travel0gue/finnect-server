@@ -15,6 +15,9 @@ import com.example.finnect.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +33,7 @@ public class AuthService {
     
     public AuthResponse signup(SignupRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("이미 존재하는 사용자명입니다.");
+            throw new CustomException(ErrorStatus._BAD_REQUEST);
         }
         
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -52,15 +55,19 @@ public class AuthService {
     }
     
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+        } catch (AuthenticationException e) {
+            throw new CustomException(ErrorStatus._LOGIN_FAILURE);
+        }
         
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorStatus._NOT_FOUND));
         
         String accessToken = jwtUtil.generateAccessToken(user);
         RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(user.getId());
@@ -79,6 +86,15 @@ public class AuthService {
                     RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
                     return new TokenRefreshResponse(accessToken, newRefreshToken.getToken());
                 })
-                .orElseThrow(() -> new RuntimeException("유효하지 않은 리프레시 토큰입니다."));
+                .orElseThrow(() -> new CustomException(ErrorStatus._UNAUTHORIZED));
+    }
+    
+    public void logout() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof User user) {
+            refreshTokenService.deleteByUserId(user.getId());
+        } else {
+            throw new CustomException(ErrorStatus._UNAUTHORIZED);
+        }
     }
 }
