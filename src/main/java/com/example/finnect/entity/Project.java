@@ -214,7 +214,8 @@ public class Project {
         this.title = projectCreateRequest.getTitle();
         this.content = projectCreateRequest.getContent();
         this.fundingType = projectCreateRequest.getFundingType();
-        this.projectImages = projectCreateRequest.getProjectImages().stream().toList();
+        this.projectImages = projectCreateRequest.getProjectImages() != null ?
+                new ArrayList<>(projectCreateRequest.getProjectImages()) : new ArrayList<>();
         this.targetAmount = projectCreateRequest.getTargetAmount();
         this.minInvestment = projectCreateRequest.getMinInvestment();
         this.maxInvestment = projectCreateRequest.getMaxInvestment();
@@ -238,6 +239,6 @@ public class Project {
     
     // 수정 가능 여부 확인 메소드
     public boolean isEditable() {
-        return this.status == ProjectStatus.DRAFT || this.status == ProjectStatus.SUBMITTED;
+        return this.status == ProjectStatus.DRAFT;
     }
 }

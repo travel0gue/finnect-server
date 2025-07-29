@@ -5,10 +5,16 @@ import com.example.finnect.dto.request.*;
 import com.example.finnect.dto.response.ProjectResponse;
 import com.example.finnect.dto.response.RewardResponse;
 import com.example.finnect.entity.*;
+import com.example.finnect.entity.enums.FundingType;
 import com.example.finnect.entity.enums.ProjectStatus;
 import com.example.finnect.exception.CustomException;
 import com.example.finnect.repository.ProjectRepository;
 import com.example.finnect.repository.RewardRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,25 +55,24 @@ public class ProjectService {
     }
     
     // 제출 검증 (모든 필수 필드 검증)
-    private void validateProjectRequest(ProjectCreateRequest request) {
-        if (request.getFundingStartDate().isAfter(request.getFundingEndDate())) {
+    private void validateProjectRequest(Project project) {
+        if (project.getFundingStartDate().isAfter(project.getFundingEndDate())) {
             throw new IllegalArgumentException("펀딩 시작일은 종료일보다 이전이어야 합니다.");
         }
         
-        if (request.getMaxInvestment() != null && 
-            request.getMinInvestment() != null &&
-            request.getMaxInvestment().compareTo(request.getMinInvestment()) < 0) {
+        if (project.getMaxInvestment() != null &&
+            project.getMinInvestment() != null &&
+            project.getMaxInvestment().compareTo(project.getMinInvestment()) < 0) {
             throw new IllegalArgumentException("최대 투자 금액은 최소 투자 금액보다 커야 합니다.");
         }
-        
-        if (request.getMinInvestment() != null && 
-            request.getMinInvestment().compareTo(request.getTargetAmount()) >= 0) {
+
+        if (project.getMinInvestment() != null &&
+            project.getMinInvestment().compareTo(project.getTargetAmount()) >= 0) {
             throw new IllegalArgumentException("최소 투자 금액은 목표 금액보다 작아야 합니다.");
         }
     }
 
     public ProjectResponse updateProject(ProjectCreateRequest request, User user, Long projectId) {
-        validateProjectRequest(request);
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.NOT_FOUND_PROJECT));
@@ -75,6 +80,11 @@ public class ProjectService {
         //프로젝트 주인이 아닌 경우
         if (!project.isOwnedBy(user.getId())) {
             throw new CustomException(ErrorStatus.NOT_FOUND_PROJECT);
+        }
+
+        // 프로젝트 수정 가능 상태 확인
+        if (!project.isEditable()) {
+            throw new CustomException(ErrorStatus.PROJECT_ALREADY_APPROVED);
         }
 
         project.updateProjectInfo(request);
@@ -89,6 +99,11 @@ public class ProjectService {
         //프로젝트 주인이 아닌 경우
         if (!project.isOwnedBy(user.getId())) {
             throw new CustomException(ErrorStatus.NOT_FOUND_PROJECT);
+        }
+
+        // 프로젝트 수정 가능 상태 확인
+        if (!project.isEditable()) {
+            throw new CustomException(ErrorStatus.PROJECT_ALREADY_APPROVED);
         }
 
         projectRepository.delete(project);
@@ -302,6 +317,34 @@ public class ProjectService {
         log.info("후원 리워드가 생성되었습니다. Project ID: {}, Reward ID: {}", projectId, savedReward.getId());
         
         return RewardResponse.from(savedReward);
+    }
+    
+    // 리워드 삭제 기능 (다형성 활용)
+    public void deleteReward(Long rewardId, User user) {
+        Reward reward = rewardRepository.findById(rewardId)
+                .orElseThrow(() -> new CustomException(ErrorStatus.NOT_FOUND_REWARD));
+        
+        // 프로젝트 소유자 확인
+        if (!reward.getProject().isOwnedBy(user.getId())) {
+            throw new CustomException(ErrorStatus.NOT_FOUND_PROJECT);
+        }
+        
+        // 프로젝트 수정 가능 상태 확인
+        if (!reward.getProject().isEditable()) {
+            throw new CustomException(ErrorStatus.PROJECT_ALREADY_APPROVED);
+        }
+        
+        rewardRepository.delete(reward);
+        log.info("리워드가 삭제되었습니다. Reward ID: {}, Project ID: {}", rewardId, reward.getProject().getId());
+    }
+    
+    // 프로젝트 ID로 리워드 리스트 조회
+    @Transactional(readOnly = true)
+    public List<RewardResponse> getRewardsByProjectId(Long projectId) {
+        List<Reward> rewards = rewardRepository.findByProjectId(projectId);
+        return rewards.stream()
+                .map(RewardResponse::from)
+                .collect(Collectors.toList());
     }
 
     private Reward createBasicDraft(Project project) {

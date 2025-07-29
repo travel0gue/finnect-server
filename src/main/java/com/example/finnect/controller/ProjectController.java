@@ -4,14 +4,20 @@ import com.example.finnect.apiResponse.ApiResponse;
 import com.example.finnect.dto.request.*;
 import com.example.finnect.dto.response.ProjectResponse;
 import com.example.finnect.dto.response.RewardResponse;
+import com.example.finnect.entity.Project;
 import com.example.finnect.entity.User;
+import java.util.List;
+import com.example.finnect.entity.enums.FundingType;
 import com.example.finnect.repository.ProjectRepository;
 import com.example.finnect.service.ProjectService;
+import org.springframework.data.domain.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +65,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{project_id}")
+    @Operation(summary = "프로젝트 삭제")
     public ApiResponse<Void> deleteProject(
             @PathVariable(name = "project_id") Long projectId,
             @AuthenticationPrincipal User currentUser
@@ -66,7 +73,20 @@ public class ProjectController {
         projectService.deleteProject(projectId, currentUser);
         return ApiResponse.onSuccess("프로젝트가 성공적으로 삭제되었습니다.");
     }
-    
+
+    @GetMapping("/my")
+    @Operation(summary = "내 프로젝트 조회")
+    public ApiResponse<Page<ProjectResponse>> getMyProjects(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal User currentUser) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Project> projects = projectRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getId(), pageable);
+        Page<ProjectResponse> projectResponses = projects.map(ProjectResponse::from);
+        return ApiResponse.onSuccess(projectResponses);
+    }
+
     // 리워드 생성 API (Request 기반)
     @PostMapping("/{project_id}/rewards/bond")
     @Operation(summary = "채권 리워드 생성")
@@ -156,4 +176,26 @@ public class ProjectController {
         RewardResponse response = projectService.updateDonationReward(rewardId, request, currentUser);
         return ApiResponse.onSuccess(response);
     }
+    
+    // 리워드 삭제 API (다형성 활용)
+    @DeleteMapping("/rewards/{reward_id}")
+    @Operation(summary = "리워드 삭제")
+    public ApiResponse<Void> deleteReward(
+            @PathVariable(name = "reward_id") Long rewardId,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        projectService.deleteReward(rewardId, currentUser);
+        return ApiResponse.onSuccess("리워드가 성공적으로 삭제되었습니다.");
+    }
+    
+    // 프로젝트 ID로 리워드 리스트 조회 API
+    @GetMapping("/{project_id}/rewards")
+    @Operation(summary = "프로젝트의 리워드 리스트 조회")
+    public ApiResponse<List<RewardResponse>> getRewardsByProjectId(
+            @PathVariable(name = "project_id") Long projectId
+    ) {
+        List<RewardResponse> rewards = projectService.getRewardsByProjectId(projectId);
+        return ApiResponse.onSuccess(rewards);
+    }
+
 }
