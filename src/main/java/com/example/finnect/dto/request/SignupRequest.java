@@ -1,4 +1,4 @@
-package com.example.finnect.dto;
+package com.example.finnect.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

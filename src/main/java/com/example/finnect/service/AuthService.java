@@ -1,11 +1,11 @@
 package com.example.finnect.service;
 
 import com.example.finnect.apiResponse.ErrorStatus;
-import com.example.finnect.dto.AuthResponse;
-import com.example.finnect.dto.LoginRequest;
-import com.example.finnect.dto.SignupRequest;
-import com.example.finnect.dto.TokenRefreshRequest;
-import com.example.finnect.dto.TokenRefreshResponse;
+import com.example.finnect.dto.response.AuthResponse;
+import com.example.finnect.dto.request.LoginRequest;
+import com.example.finnect.dto.request.SignupRequest;
+import com.example.finnect.dto.request.TokenRefreshRequest;
+import com.example.finnect.dto.response.TokenRefreshResponse;
 import com.example.finnect.entity.RefreshToken;
 import com.example.finnect.entity.Role;
 import com.example.finnect.entity.User;
@@ -13,6 +13,7 @@ import com.example.finnect.exception.CustomException;
 import com.example.finnect.repository.UserRepository;
 import com.example.finnect.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
     
     private final UserRepository userRepository;
@@ -88,7 +90,7 @@ public class AuthService {
                 })
                 .orElseThrow(() -> new CustomException(ErrorStatus._UNAUTHORIZED));
     }
-    
+
     public void logout() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof User user) {

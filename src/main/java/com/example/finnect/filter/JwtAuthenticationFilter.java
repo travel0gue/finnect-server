@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private final JwtUtil jwtUtil;
@@ -31,18 +33,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
-        
+        System.out.println("jwtAuthenticationFilter");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("토큰 없나?");
             filterChain.doFilter(request, response);
             return;
         }
         
         jwt = authHeader.substring(7);
         username = jwtUtil.extractUsername(jwt);
-        
+        System.out.println("username 안 나와?");
+        System.out.println(username);
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            
+            System.out.println("유저 디테일");
+            System.out.println(userDetails);
             if (jwtUtil.validateToken(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,

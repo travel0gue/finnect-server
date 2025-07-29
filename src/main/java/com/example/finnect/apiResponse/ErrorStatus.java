@@ -19,6 +19,9 @@ public enum ErrorStatus {
     _LOGIN_FAILURE(HttpStatus.UNAUTHORIZED, "로그인을 실패했습니다."),
 
     DUPLICATED_USER(HttpStatus.BAD_REQUEST, "이미 존재하는 사용자입니다."),
+    NOT_FOUND_PROJECT(HttpStatus.NOT_FOUND, "존재하지 않는 프로젝트 아이디입니다."),
+    PROJECT_ALREADY_APPROVED(HttpStatus.BAD_REQUEST, "이미 승인된 프로젝트는 수정할 수 없습니다."),
+    NOT_FOUND_REWARD(HttpStatus.NOT_FOUND, "존재하지 않는 리워드 아이디입니다."),
     ;
 
     private final HttpStatus httpStatus;

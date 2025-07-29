@@ -1,5 +1,6 @@
 package com.example.finnect.entity;
 
+import com.example.finnect.dto.request.BondRewardRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -61,4 +62,49 @@ public class BondReward extends Reward {
 
     @Column(name = "payment_date", nullable = false)
     private LocalDate paymentDate; // 교부일 (예: 2025-08-14)
+
+    public static BondReward createDraft(Project project) {
+        return BondReward.builder()
+                .project(project)
+                .build();
+    }
+    
+    public static BondReward create(Project project, BondRewardRequest request) {
+        return BondReward.builder()
+                .project(project)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .amount(request.getAmount())
+                .bondType(request.getBondType())
+                .targetAmount(request.getTargetAmount())
+                .interestRate(request.getInterestRate())
+                .minInvestment(request.getMinInvestment())
+                .interestPaymentCycle(request.getInterestPaymentCycle())
+                .maturityPeriod(request.getMaturityPeriod())
+                .maturityDate(request.getMaturityDate())
+                .subscriptionStartDate(request.getSubscriptionStartDate())
+                .subscriptionEndDate(request.getSubscriptionEndDate())
+                .announcementDate(request.getAnnouncementDate())
+                .issueDate(request.getIssueDate())
+                .paymentDate(request.getPaymentDate())
+                .build();
+    }
+    
+    public void updateBondReward(BondRewardRequest request) {
+        this.setTitle(request.getTitle());
+        this.setDescription(request.getDescription());
+        this.setAmount(request.getAmount());
+        this.bondType = request.getBondType();
+        this.targetAmount = request.getTargetAmount();
+        this.interestRate = request.getInterestRate();
+        this.minInvestment = request.getMinInvestment();
+        this.interestPaymentCycle = request.getInterestPaymentCycle();
+        this.maturityPeriod = request.getMaturityPeriod();
+        this.maturityDate = request.getMaturityDate();
+        this.subscriptionStartDate = request.getSubscriptionStartDate();
+        this.subscriptionEndDate = request.getSubscriptionEndDate();
+        this.announcementDate = request.getAnnouncementDate();
+        this.issueDate = request.getIssueDate();
+        this.paymentDate = request.getPaymentDate();
+    }
 }
